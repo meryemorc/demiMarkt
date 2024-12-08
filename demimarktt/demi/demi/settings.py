@@ -37,11 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'homepage',
-    'products',
-    'search',
-    'cart',
-    'userAccount',
+    'homepage',  # Uygulamanız
+    # Eğer `products` veya diğer uygulamaları geçici olarak kullanmıyorsanız,
+    # aşağıdaki uygulamaları buradan da çıkarabilirsiniz:
+    # 'products',
+    # 'cart',
+    # 'search',
+    # 'userAccount',
 ]
 
 MIDDLEWARE = [
@@ -80,10 +82,15 @@ WSGI_APPLICATION = 'demi.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'demiMarktDB',  # MongoDB'deki veritabanı adınız
+        'CLIENT': {
+            'host': 'mongodb://meryemoruc:Asd12345@cluster0-shard-00-00.mongodb.net:27017,cluster0-shard-00-01.mongodb.net:27017,cluster0-shard-00-02.mongodb.net:27017/demiMarktDB?ssl=true&replicaSet=atlas-xyz-shard-0&authSource=admin&retryWrites=true&w=majority',
+            'tls': True,  # TLS bağlantısı kullanımı
+        }
     }
 }
+
 
 
 # Password validation
