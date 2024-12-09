@@ -80,17 +80,16 @@ WSGI_APPLICATION = 'demi.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'demiMarktDB',  # MongoDB'deki veritabanı adınız
+        'ENGINE': 'djongo',  # Djongo motoru
+        'NAME': 'demiMarktDB',  # Veritabanı adı
         'CLIENT': {
-            'host': 'mongodb://meryemoruc:Asd12345@cluster0-shard-00-00.mongodb.net:27017,cluster0-shard-00-01.mongodb.net:27017,cluster0-shard-00-02.mongodb.net:27017/demiMarktDB?ssl=true&replicaSet=atlas-xyz-shard-0&authSource=admin&retryWrites=true&w=majority',
-            'tls': True,  # TLS bağlantısı kullanımı
+            'host': 'mongodb+srv://meryemoruc:Asd12345@cluster0.ifzdj.mongodb.net/demiMarktDB?retryWrites=true&w=majority&appName=Cluster0'
         }
     }
 }
-
 
 
 # Password validation
