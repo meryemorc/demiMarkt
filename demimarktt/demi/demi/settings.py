@@ -37,13 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'homepage',  # Uygulamanız
-    # Eğer `products` veya diğer uygulamaları geçici olarak kullanmıyorsanız,
-    # aşağıdaki uygulamaları buradan da çıkarabilirsiniz:
-    # 'products',
-    # 'cart',
-    # 'search',
-    # 'userAccount',
+    'homepage',
+    'products',
+    'cart',
+    'search',
+    'userAccount',
 ]
 
 MIDDLEWARE = [
