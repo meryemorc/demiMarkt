@@ -4,7 +4,7 @@ from django.http import HttpResponse
 # Kullanıcının sepetini görüntüleme
 def view_cart(request):
     cart_items = [
-        {'product': {'id': 1, 'name': 'Telefon', 'price': 15000}, 'quantity': 1},
+        {'product': {'id': 2, 'name': 'Telefon', 'price': 15000}, 'quantity': 1},
         {'product': {'id': 2, 'name': 'Laptop', 'price': 25000}, 'quantity': 2},
     ]
 
