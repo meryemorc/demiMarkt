@@ -3,7 +3,16 @@ from django.http import HttpResponse
 
 # Kullanıcının sepetini görüntüleme
 def view_cart(request):
-    return HttpResponse("Sepet içeriği burada listelenecek.")
+    cart_items = [
+        {'product': {'id': 1, 'name': 'Telefon', 'price': 15000}, 'quantity': 1},
+        {'product': {'id': 2, 'name': 'Laptop', 'price': 25000}, 'quantity': 2},
+    ]
+
+    for item in cart_items:
+        item['total'] = item['product']['price'] * item['quantity']
+
+    total_price = sum(item['total'] for item in cart_items)
+    return render(request, 'cart/cart.html', {'cart_items': cart_items, 'total_price': total_price})
 
 # Sepete ürün ekleme
 def add_to_cart(request, product_id):
