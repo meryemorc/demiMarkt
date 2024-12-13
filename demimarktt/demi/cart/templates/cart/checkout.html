@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+</head>
+<body>
+    <h1>Ödeme ve Kayıt İşlemleri</h1>
+
+    {% if user %}
+        <!-- Başarı Mesajı -->
+        <div style="margin: 20px 0; padding: 10px; border: 2px solid green; color: green; background-color: #eaffea;">
+            <p>Kayıt işlemi başarıyla tamamlandı: {{ user.full_name }}</p>
+            <div>
+                <a href="{% url 'homepage' %}" style="text-decoration: none; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; margin-right: 10px;">Anasayfaya Git</a>
+                <a href="{% url 'view_cart' %}" style="text-decoration: none; padding: 10px 20px; background-color: #28a745; color: white; border-radius: 5px;">Sepete Git</a>
+            </div>
+        </div>
+    {% else %}
+        <!-- Form -->
+        <form method="post" action="">
+            {% csrf_token %}
+            <label for="full_name">Ad Soyad:</label>
+            <input type="text" id="full_name" name="full_name" required><br>
+
+            <label for="email">E-posta:</label>
+            <input type="email" id="email" name="email" required><br>
+
+            <label for="phone">Telefon:</label>
+            <input type="tel" id="phone" name="phone" required><br>
+
+            <h3>Adres Bilgileri</h3>
+            <label for="address">Adres:</label>
+            <input type="text" id="address" name="address" required><br>
+
+            <label for="city">Şehir:</label>
+            <input type="text" id="city" name="city" required><br>
+
+            <label for="postal_code">Posta Kodu:</label>
+            <input type="text" id="postal_code" name="postal_code" required><br>
+
+            <h3>Ödeme Bilgileri</h3>
+            <label for="card_number">Kart Numarası:</label>
+            <input type="text" id="card_number" name="card_number" required><br>
+
+            <label for="expiry_date">Son Kullanma Tarihi:</label>
+            <input type="text" id="expiry_date" name="expiry_date" placeholder="MM/YYYY" required><br>
+
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" name="cvv" required><br>
+
+            <button type="submit">Kaydet</button>
+        </form>
+    {% endif %}
+</body>
+</html>
