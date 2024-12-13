@@ -72,10 +72,6 @@
     {% if cart_items %}
     <div class="cart-summary">
         <h3>Toplam Fiyat: {{ total_price }} ₺</h3>
-        <div class="cart-actions">
-            <a href="{% url 'clear_cart' %}" class="btn btn-danger">Sepeti Temizle</a>
-            <a href="{% url 'checkout' %}" class="btn btn-success">Ödeme Yap</a>
-        </div>
     </div>
     {% endif %}
 
