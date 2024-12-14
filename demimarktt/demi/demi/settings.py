@@ -59,7 +59,7 @@ ROOT_URLCONF = 'demi.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Genel template klasörü
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

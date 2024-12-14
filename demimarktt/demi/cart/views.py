@@ -1,24 +1,69 @@
-from django.shortcuts import render, redirect  # type: ignore
 from django.http import HttpResponse  # type: ignore
+from django.shortcuts import render, redirect # type: ignore
 from .models import User, Address, PaymentMethod  # Modellerinizi kontrol edin
-from django.contrib.auth.decorators import login_required  # type: ignore # Kullanıcı oturumu kontrolü için
-from django.contrib.auth.forms import UserCreationForm  # type: ignore  # Django'nun hazır formu
-from django.contrib import messages  # type: ignore # Kullanıcıya mesajlar göstermek için
+from django.contrib import messages # type: ignore
+from django.contrib.auth import login, logout  # type: ignore # Django'nun oturum kontrolü
+from django.contrib.auth.hashers import make_password  # type: ignore
+from django.contrib.auth.hashers import check_password # type: ignore
 
 
-@login_required  # Kullanıcı giriş yapmamışsa login sayfasına yönlendirir
+def login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        try:
+            # Kullanıcıyı e-posta ile bul
+            user = User.objects.get(email=email)
+
+            # Şifreyi kontrol et
+            if check_password(password, user.password):
+                # Giriş başarılı
+                request.session['user_id'] = user.id  # Oturumu başlat
+                messages.success(request, 'Giriş başarılı!')
+                return redirect('homepage')  # Anasayfa veya başka bir sayfaya yönlendir
+            else:
+                # Şifre hatalı
+                messages.error(request, 'Hatalı şifre. Lütfen tekrar deneyin.')
+        except User.DoesNotExist:
+            # Kullanıcı bulunamadı
+            messages.error(request, 'Bu e-posta ile kayıtlı bir kullanıcı yok.')
+
+    return render(request, 'login.html')
+
+
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.')
-            return redirect('login')  # Kayıttan sonra giriş sayfasına yönlendir
-    else:
-        form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
 
-# Kullanıcının sepetini görüntüleme
+        # Veritabanında aynı e-posta adresi varsa hata döndür
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Bu e-posta adresiyle kayıt yapılmış. Giriş yapabilirsiniz.')
+            return render(request, 'register.html', {'show_login_button': True})  # Login butonunu göstermek için değişken ekledik
+        
+        # Kullanıcıyı oluştur ve şifreyi hashle
+        user = User(
+            full_name=full_name,
+            email=email,
+            password=make_password(password)  # Şifreyi hashle
+        )
+        user.save()  # Kullanıcıyı veritabanına kaydet
+        
+        messages.success(request, 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.')
+        return redirect('login')
+
+    return render(request, 'register.html', {'show_login_button': False})
+
+
+
+def logout(request):
+    request.session.flush()  # Tüm oturum verilerini siler
+    messages.success(request, 'Başarıyla çıkış yaptınız.')
+    return redirect('login')  # Giriş sayfasına yönlendirme
+
+
 def view_cart(request):
     cart_items = [
         {'product': {'id': 2, 'name': 'Telefon', 'price': 15000}, 'quantity': 1},
@@ -30,6 +75,7 @@ def view_cart(request):
 
     total_price = sum(item['total'] for item in cart_items)
     return render(request, 'cart/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
 
 # Sepete ürün ekleme
 def add_to_cart(request, product_id):

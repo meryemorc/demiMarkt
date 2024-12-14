@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çıkış Yaptınız</title>
+    <title>Çıkış Yap</title>
+    <link rel="stylesheet" href="{% static 'cart/style.css' %}">
 </head>
 <body>
-    <h1>Çıkış Yaptınız</h1>
-    <a href="{% url 'login' %}">Tekrar Giriş Yap</a>
+    <h2>Başarıyla Çıkış Yaptınız</h2>
+    <p>Tekrar giriş yapmak için <a href="{% url 'login' %}">buraya</a> tıklayın.</p>
 </body>
 </html>
