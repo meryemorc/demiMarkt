@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.product_name }} - Ürün Detayı</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'products/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-5">
+                <img src="{{ product.image_link }}" alt="{{ product.product_name }}" class="img-fluid">
+            </div>
+            <div class="col-md-7">
+                <h1>{{ product.product_name }}</h1>
+                <p><strong>Fiyat:</strong> {{ product.price|default:"-" }} $</p>
+                <p><strong>Marka:</strong> {{ product.brand }}</p>
+                <p><strong>İndirim Oranı:</strong> {{ product.discount_percentage|default:"-" }}%</p>
+                <p><strong>Önceki Fiyat:</strong> {{ product.price_before_discount|default:"-" }} $</p>
+                <p><strong>Ortalama Puan:</strong> {{ product.rating_out_of_5|default:"-" }}/5</p>
+                <p><strong>Değerlendirme Sayısı:</strong> {{ product.number_of_ratings|default:"-" }}</p>
+                <a href="/" class="btn btn-secondary">Geri Dön</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

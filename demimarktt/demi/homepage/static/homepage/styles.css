@@ -15,48 +15,67 @@ body {
 
 .navbar {
     background-color: #222;
-    border-bottom: 3px solid #007bff; /* Alt çizgi ile vurgu */
+    border-bottom: 3px solid #007bff; /* Alt çizgi vurgusu */
 }
 
 .navbar .form-control {
     max-width: 400px; /* Arama çubuğunu daralt */
 }
 
-/* Kart Stilleri */
-.card {
-    border-radius: 10px; /* Kart köşelerini yuvarlat */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge efekti */
-    overflow: hidden; /* Köşelerden taşan içerikleri gizle */
-    transition: transform 0.2s ease-in-out; /* Hover efekti */
-}
-
-.card:hover {
-    transform: scale(1.05); /* Hover sırasında kart büyüsün */
-}
-
-/* Ürün Resimleri */
-.product-image {
-    width: 100%; /* Kartın genişliği kadar */
-    height: 200px; /* Sabit bir yükseklik */
-    object-fit: cover; /* Resimleri düzgün şekilde kırp */
-    border-bottom: 1px solid #ddd; /* Resim altına ince bir çizgi */
-}
-
-/* Ürün Başlıkları */
-.card-title {
-    font-size: 1.2rem;
+/* Sidebar - Brands */
+.card-header {
     font-weight: bold;
+    background-color: #343a40; /* Koyu renk başlık */
+    color: white;
+}
+
+.list-group-item a {
+    text-decoration: none;
+    color: #007bff;
+    display: block; /* Tüm alanı tıklanabilir yap */
+    padding: 8px 10px; /* Sabit padding */
+}
+
+.list-group-item a:hover {
+    background-color: #e9ecef; /* Hover arkaplan rengi */
+    color: #0056b3; /* Hover text rengi */
+    text-decoration: none; /* Alt çizgi kaldır */
+}
+
+/* Ürün Kartları */
+.card {
+    height: 100%; /* Kart yüksekliği tutarlı olur */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 180px; /* Sabit yükseklik */
+    object-fit: cover; /* Resim kırpma yerine sığdırma */
+    object-position: center; /* Resmi merkezde tutar */
+}
+
+.card-body {
+    flex-grow: 1; /* İçerik alanının esnemesini sağlar */
+    text-align: center; /* İçerikleri ortala */
+}
+
+.card-title {
+    font-size: 0.9rem; /* Küçük başlık */
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-text {
+    font-size: 0.9rem; /* Fiyat kısmı küçülsün */
     margin-bottom: 0.5rem;
 }
 
-/* Fiyat Yazısı */
-.card-text {
-    font-size: 1rem;
-    color: #007bff; /* Fiyata vurgu rengi */
-    font-weight: bold;
-}
 
-/* Butonlar */
 .btn-primary {
     background-color: #007bff;
     border: none;
@@ -66,26 +85,56 @@ body {
     background-color: #0056b3;
 }
 
+.pagination .page-item {
+    margin: 0 2px; /* Sayfa butonları arası boşluk */
+}
+
+.pagination .page-item .page-link {
+    color: #007bff;
+    border: none;
+    border-radius: 5px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #aaa;
+    cursor: not-allowed;
+}
+
 /* Footer */
 .footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
     background-color: #222;
     color: #fff;
     text-align: center;
     padding: 10px 0;
     font-size: 0.9rem;
-    border-top: 3px solid #007bff; /* Üst vurgulu çizgi */
 }
 
 /* Mobil Uyum */
 @media (max-width: 768px) {
     .navbar .form-control {
-        max-width: 100%; /* Arama çubuğu mobilde genişlesin */
+        max-width: 100%; /* Mobilde arama çubuğunu genişlet */
+    }
+
+    .list-group-item a {
+        padding: 10px; /* Tıklama alanını büyüt */
     }
 
     .card {
-        margin-bottom: 20px; /* Mobilde kartların arası açılsın */
+        margin-bottom: 20px; /* Kartlar arasına boşluk ekle */
     }
 }
+/* Tüm hover efektlerini sıfırla */
+*:hover, *:focus, *:active {
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+

@@ -1,0 +1,17 @@
+/* Ürün Detay Sayfası Stil Örneği */
+h1 {
+    color: #007bff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.img-fluid {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+}
