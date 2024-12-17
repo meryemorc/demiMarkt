@@ -13,29 +13,39 @@ def homepage(request):
 
     # Ürünlerin fiyatlarını kontrol et ve düzelt
     for product in products:
-        if product.price is None or (isinstance(product.price, float) and math.isnan(product.price)):
-            product.temp_price = "500 $"  # Fiyat bilinmiyorsa 500 $ olarak ayarla
-        else:
-            product.temp_price = f"{product.price} $"
+        try:
+            # Virgülleri noktaya çevirip float'a dönüştür
+            price = float(str(product.price).replace(',', '').replace(' ', ''))
+            if math.isnan(price):  # Eğer fiyat NaN ise
+                product.temp_price = "500 $"
+            else:
+                product.temp_price = f"{price:.2f} $"  # Formatlı fiyat
+        except (ValueError, TypeError):  # Geçersiz veya boş fiyat durumunda
+            product.temp_price = "500 $"
 
-    # Markaları çek ve popüler/diğer brand'ları ayır
+    # Markaları çek ve filtrele
     all_brands = (
         Product.objects
         .values('brand')
         .annotate(brand_count=Count('brand'))
-        .filter(brand__isnull=False)
+        .filter(brand__isnull=False, brand__gt='')  # Boş olmayanları filtrele
         .exclude(brand="nan")
         .order_by('-brand_count')
     )
-    # Popüler brand'lar ve diğer brand'ların sayısını hesapla
-    popular_brands = [brand for brand in all_brands if brand['brand_count'] >= 200]
-    other_brands = [brand['brand'] for brand in all_brands if brand['brand_count'] < 200]
+    popular_brands = all_brands[:10]  # İlk 10 markayı al
+
+    # Debug: Terminale markaları yazdır
+    print("All brands:", all_brands)
+    print("Popular brands:", popular_brands)
+
+    other_brands_count = sum(brand['brand_count'] for brand in all_brands[10:])
 
     # Brand filtresi
     if brand_filter == 'other':
-        products = products.filter(brand__in=other_brands)  # "Diğer" brand'ları filtrele
+        other_brands = [brand['brand'] for brand in all_brands[10:]]
+        products = products.filter(brand__in=other_brands)
     elif brand_filter:
-        products = products.filter(brand=brand_filter)  # Seçilen brand'ı filtrele
+        products = products.filter(brand=brand_filter)
 
     # Sayfalama
     paginator = Paginator(products, 20)
@@ -45,7 +55,7 @@ def homepage(request):
     return render(request, 'homepage/homepage.html', {
         'products': products_page,
         'popular_brands': popular_brands,
-        'other_brands_count': sum(brand['brand_count'] for brand in all_brands if brand['brand_count'] < 200),
+        'other_brands_count': other_brands_count,
     })
 
 
@@ -60,7 +70,10 @@ def contact(request):
 def profile_view(request):
     user_id = request.session.get('user_id')
     if user_id:
-        user = User.objects.get(id=user_id)  # Kullanıcı bilgilerini al
-        return render(request, 'profile.html', {'user': user})
+        try:
+            user = User.objects.get(id=user_id)  # Kullanıcı bilgilerini al
+            return render(request, 'profile.html', {'user': user})
+        except User.DoesNotExist:
+            return redirect('login')  # Kullanıcı bulunamazsa login sayfasına yönlendir
     else:
         return redirect('login')  # Oturum yoksa login sayfasına yönlendir
