@@ -35,7 +35,6 @@ def homepage(request):
     popular_brands = all_brands[:10]  # İlk 10 markayı al
 
     # Debug: Terminale markaları yazdır
-    print("All brands:", all_brands)
     print("Popular brands:", popular_brands)
 
     other_brands_count = sum(brand['brand_count'] for brand in all_brands[10:])
@@ -58,14 +57,11 @@ def homepage(request):
         'other_brands_count': other_brands_count,
     })
 
-
 def about(request):
     return HttpResponse("Hakkımızda")
 
-
 def contact(request):
     return HttpResponse("İletişim")
-
 
 def profile_view(request):
     user_id = request.session.get('user_id')

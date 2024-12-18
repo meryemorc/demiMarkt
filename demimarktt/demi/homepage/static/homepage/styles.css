@@ -1,140 +1,97 @@
 /* Genel Stil Ayarları */
+* {
+    box-sizing: border-box; /* Tüm elemanlarda kutu modelini sabitle */
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
     color: #333;
     margin: 0;
     padding: 0;
-}
-
-/* Navbar */
-.navbar-brand {
-    font-weight: bold;
-    color: #fff !important;
-}
-
-.navbar {
-    background-color: #222;
-    border-bottom: 3px solid #007bff; /* Alt çizgi vurgusu */
-}
-
-.navbar .form-control {
-    max-width: 400px; /* Arama çubuğunu daralt */
+    overflow-x: hidden; /* Yatay kaymayı engelle */
 }
 
 /* Sidebar - Brands */
+.col-md-3 {
+    position: sticky;
+    top: 0; /* Üst boşluğu sıfırladık */
+    height: calc(100vh - 10px); /* Sayfa yüksekliği -10px ile daha iyi sığdır */
+    overflow-y: auto; /* Scrollbar eklensin */
+    background-color: #fff;
+    border-right: 1px solid #ccc;
+    margin: 0; /* Margin'i sıfırla */
+    padding: 0; /* Padding'i sıfırla */
+    z-index: 1000;
+}
+
 .card-header {
     font-weight: bold;
-    background-color: #343a40; /* Koyu renk başlık */
+    background-color: #343a40;
     color: white;
+    text-align: center; /* Başlığı ortala */
+}
+
+/* Liste öğeleri */
+.list-group-item {
+    padding: 8px 10px; /* Liste öğelerinin iç boşluğu */
 }
 
 .list-group-item a {
     text-decoration: none;
     color: #007bff;
-    display: block; /* Tüm alanı tıklanabilir yap */
-    padding: 8px 10px; /* Sabit padding */
+    display: block; /* Tüm liste elemanını tıklanabilir yap */
 }
 
 .list-group-item a:hover {
-    background-color: #e9ecef; /* Hover arkaplan rengi */
-    color: #0056b3; /* Hover text rengi */
-    text-decoration: none; /* Alt çizgi kaldır */
+    background-color: #e9ecef;
+    color: #0056b3;
 }
 
 /* Ürün Kartları */
 .card {
-    height: 100%; /* Kart yüksekliği tutarlı olur */
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border: 1px solid #ddd;
 }
 
 .card-img-top {
-    width: 100%;
-    height: 180px; /* Sabit yükseklik */
-    object-fit: cover; /* Resim kırpma yerine sığdırma */
-    object-position: center; /* Resmi merkezde tutar */
+    height: 180px;
+    object-fit: cover;
+    object-position: center;
 }
 
-.card-body {
-    flex-grow: 1; /* İçerik alanının esnemesini sağlar */
-    text-align: center; /* İçerikleri ortala */
-}
-
-.card-title {
-    font-size: 0.9rem; /* Küçük başlık */
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.card-text {
-    font-size: 0.9rem; /* Fiyat kısmı küçülsün */
-    margin-bottom: 0.5rem;
-}
-
-
-.btn-primary {
-    background-color: #007bff;
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
-.pagination .page-item {
-    margin: 0 2px; /* Sayfa butonları arası boşluk */
-}
-
-.pagination .page-item .page-link {
-    color: #007bff;
-    border: none;
-    border-radius: 5px;
-}
-
-.pagination .page-item.active .page-link {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #aaa;
-    cursor: not-allowed;
+.card-title, .card-text {
+    text-align: center;
+    margin-bottom: 5px;
 }
 
 /* Footer */
 .footer {
     background-color: #222;
-    color: #fff;
+    color: white;
     text-align: center;
     padding: 10px 0;
-    font-size: 0.9rem;
+}
+
+/* Tarayıcı Scrollbar Sorunu */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Yatay kaymayı engelle */
 }
 
 /* Mobil Uyum */
 @media (max-width: 768px) {
-    .navbar .form-control {
-        max-width: 100%; /* Mobilde arama çubuğunu genişlet */
+    .col-md-3 {
+        position: static; /* Mobilde sticky kaldırılır */
+        height: auto;
+        overflow: visible;
     }
 
-    .list-group-item a {
-        padding: 10px; /* Tıklama alanını büyüt */
-    }
-
-    .card {
-        margin-bottom: 20px; /* Kartlar arasına boşluk ekle */
+    .list-group-item {
+        padding: 12px; /* Daha büyük tıklama alanı */
     }
 }
-/* Tüm hover efektlerini sıfırla */
-*:hover, *:focus, *:active {
-    transform: none !important;
-    transition: none !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
