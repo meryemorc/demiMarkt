@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,31 +10,33 @@
 <body>
     <div class="container mt-5">
         <h2 class="text-center mb-4">Giriş Yap</h2>
+
+        <!-- Mesajlar -->
+        {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                    <div class="alert alert-warning">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <form method="post" action="" class="w-50 mx-auto">
             {% csrf_token %}
             <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
+                <label for="email" class="form-label">E-posta Adresi</label>
                 <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required>
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                <div id="emailHelp" class="form-text">E-posta adresiniz asla başkalarıyla paylaşılmayacaktır.</div>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">Şifre</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="rememberMe">
-                <label class="form-check-label" for="rememberMe">Remember Me</label>
+                <label class="form-check-label" for="rememberMe">Beni Hatırla</label>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Submit</button>
+            <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
         </form>
-
-        {% if messages %}
-            <div class="mt-4">
-                {% for message in messages %}
-                    <p class="alert alert-info">{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
 
         <!-- Kayıt Ol Bağlantısı -->
         <div class="text-center mt-4">

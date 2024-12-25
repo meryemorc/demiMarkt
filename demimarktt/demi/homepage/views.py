@@ -4,50 +4,60 @@ from cart.models import User  # type: ignore
 from products.models import Product  # type: ignore
 from django.core.paginator import Paginator  # type: ignore
 from django.db.models import Count  # type: ignore
-import math  # nan kontrolü için
+
+# Geçerli renklerin listesi
+VALID_COLORS = [
+    "Black", "Blue", "Red", "Green", "White", "Yellow", "Orange", "Purple",
+    "Pink", "Gray", "Silver", "Gold", "Brown", "Lavender",
+    "Navy", "Turquoise"
+]
 
 def homepage(request):
-    # Ürünleri çek
+    # Ürünleri çek (artık ID ve fiyatlar temizlendiği için ekstra kontrole gerek yok)
     products = Product.objects.all()
-    brand_filter = request.GET.get('brand')
 
-    # Ürünlerin fiyatlarını kontrol et ve düzelt
-    for product in products:
-        try:
-            # Virgülleri noktaya çevirip float'a dönüştür
-            price = float(str(product.price).replace(',', '').replace(' ', ''))
-            if math.isnan(price):  # Eğer fiyat NaN ise
-                product.temp_price = "500 $"
-            else:
-                product.temp_price = f"{price:.2f} $"  # Formatlı fiyat
-        except (ValueError, TypeError):  # Geçersiz veya boş fiyat durumunda
-            product.temp_price = "500 $"
+    # Marka filtresi
+    brand_filter = request.GET.get('brand')
 
     # Markaları çek ve filtrele
     all_brands = (
         Product.objects
         .values('brand')
         .annotate(brand_count=Count('brand'))
-        .filter(brand__isnull=False, brand__gt='')  # Boş olmayanları filtrele
-        .exclude(brand="nan")
+        .filter(brand__isnull=False, brand__gt='')  # Boş olmayan markaları filtrele
         .order_by('-brand_count')
     )
     popular_brands = all_brands[:10]  # İlk 10 markayı al
-
-    # Debug: Terminale markaları yazdır
-    print("Popular brands:", popular_brands)
-
     other_brands_count = sum(brand['brand_count'] for brand in all_brands[10:])
 
-    # Brand filtresi
+    # Marka filtresine göre ürünleri filtrele
     if brand_filter == 'other':
         other_brands = [brand['brand'] for brand in all_brands[10:]]
         products = products.filter(brand__in=other_brands)
     elif brand_filter:
         products = products.filter(brand=brand_filter)
 
+    # Renk filtresi
+    all_colors = (
+        Product.objects
+        .values_list("available_colors", flat=True)
+        .filter(available_colors__isnull=False)
+    )
+
+    # Renkleri ayır ve eşsiz bir liste oluştur
+    color_set = set()
+    for color_list in all_colors:
+        if color_list:
+            colors = [color.strip() for color in color_list.split(",")]
+            valid_colors = [color for color in colors if color in VALID_COLORS]
+            color_set.update(valid_colors)
+
+    color_filter = request.GET.get('color')  # Renk filtresini al
+    if color_filter and color_filter in VALID_COLORS:
+        products = products.filter(available_colors__icontains=color_filter)
+
     # Sayfalama
-    paginator = Paginator(products, 20)
+    paginator = Paginator(products, 20)  # Her sayfada 20 ürün göster
     page_number = request.GET.get('page')
     products_page = paginator.get_page(page_number)
 
@@ -55,6 +65,7 @@ def homepage(request):
         'products': products_page,
         'popular_brands': popular_brands,
         'other_brands_count': other_brands_count,
+        'colors': sorted(color_set),  # Renklere göre filtre
     })
 
 def about(request):

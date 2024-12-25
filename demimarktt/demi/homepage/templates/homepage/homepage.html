@@ -25,7 +25,7 @@
                     </form>
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a href="/cart/" class="btn btn-primary me-md-2">Sepetim</a>
+                    <a href="{% url 'view_cart' %}" class="btn btn-primary me-md-2">Sepetim</a>
                     <a href="/profile/" class="btn btn-secondary">Profilim</a>
                 </div>
             </div>
@@ -36,20 +36,63 @@
     <main class="content">
         <div class="container mt-4">
             <div class="row">
-                <!-- Sidebar (Brand List) -->
+                <!-- Sidebar (Filters) -->
                 <div class="col-md-3">
                     <div class="card">
-                        <div class="list-group">
-                            {% for brand in popular_brands %}
-                                <a href="?brand={{ brand.brand }}" 
-                                   class="list-group-item list-group-item-action {% if forloop.first %}active{% endif %}" 
-                                   aria-current="true">
-                                    {{ brand.brand }} ({{ brand.brand_count }})
-                                </a>
-                            {% endfor %}
-                            <a href="?brand=other" class="list-group-item list-group-item-action">
-                                Diğer ({{ other_brands_count }} ürün)
-                            </a>
+                        <div class="card-header">Filtreler</div>
+                        <div class="card-body">
+                            <!-- Brand Filter -->
+                            <h6 class="fw-bold">Markalar</h6>
+                            <form method="get" id="filter-form">
+                                {% for brand in popular_brands %}
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            name="brand" 
+                                            value="{{ brand.brand }}" 
+                                            id="brand-{{ forloop.counter }}" 
+                                            {% if request.GET.brand and request.GET.brand == brand.brand %}checked{% endif %}>
+                                        <label class="form-check-label" for="brand-{{ forloop.counter }}">
+                                            {{ brand.brand }} ({{ brand.brand_count }})
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                                <div class="form-check">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        name="brand" 
+                                        value="other" 
+                                        id="brand-other" 
+                                        {% if request.GET.brand and request.GET.brand == 'other' %}checked{% endif %}>
+                                    <label class="form-check-label" for="brand-other">
+                                        Diğer ({{ other_brands_count }} ürün)
+                                    </label>
+                                </div>
+
+                                <!-- Color Filter -->
+                                <h6 class="fw-bold mt-3">Renkler</h6>
+                                {% for color in colors %}
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            name="color" 
+                                            value="{{ color }}" 
+                                            id="color-{{ forloop.counter }}" 
+                                            {% if request.GET.color and request.GET.color == color %}checked{% endif %}>
+                                        <label class="form-check-label" for="color-{{ forloop.counter }}">
+                                            {{ color }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+
+                                <!-- Filter Button -->
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -71,10 +114,10 @@
                                         {{ product.brand }} - {{ product.model_name }}
                                     </h5>
 
-                                    <!-- Ürüne Git ve Sepete Ekle Butonları -->
+                                    <!-- Ürünü Git ve Sepete Ekle Butonları -->
                                     <div class="mt-auto d-flex justify-content-between">
-                                        <a href="{% url 'product_detail' product.ID|floatformat:0 %}" 
-                                           class="btn btn-primary btn-sm">Ürüne Git</a>
+                                        <a href="{% url 'product_detail' product.ID %}" 
+                                           class="btn btn-primary btn-sm">View Product</a>
                                         <form method="post" action="/cart/add/">
                                             {% csrf_token %}
                                             <input type="hidden" name="product_id" value="{{ product.ID }}">

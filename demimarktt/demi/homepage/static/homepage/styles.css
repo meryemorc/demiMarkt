@@ -12,7 +12,7 @@ body {
     overflow-x: hidden; /* Yatay kaymayı engelle */
 }
 
-/* Sidebar - Brands */
+/* Sidebar - Brands and Colors */
 .col-md-3 {
     position: sticky;
     top: 0; /* Üst boşluğu sıfırladık */
@@ -47,6 +47,50 @@ body {
     background-color: #e9ecef;
     color: #0056b3;
 }
+
+/* Renk Filtreleme */
+.color-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    justify-content: center;
+}
+
+.color-filter a {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid #ddd;
+    text-align: center;
+    line-height: 40px;
+    text-decoration: none;
+    color: transparent; /* Renk ismi görünmesin */
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-filter a:hover {
+    transform: scale(1.2);
+    border-color: #007bff;
+}
+
+/* Renkler için özel renk tanımları */
+.color-filter .altin { background-color: gold; }
+.color-filter .bej { background-color: #f5f5dc; }
+.color-filter .beyaz { background-color: white; }
+.color-filter .bordo { background-color: #800000; }
+.color-filter .ekru { background-color: #f0ead6; }
+.color-filter .gri { background-color: gray; }
+.color-filter .haki { background-color: #808000; }
+.color-filter .kahverengi { background-color: #8b4513; }
+.color-filter .kirmizi { background-color: red; }
+.color-filter .lacivert { background-color: #000080; }
+.color-filter .mavi { background-color: blue; }
+.color-filter .mor { background-color: purple; }
+.color-filter .sari { background-color: yellow; }
+.color-filter .siyah { background-color: black; }
+.color-filter .yesil { background-color: green; }
 
 /* Ürün Kartları */
 .card {
