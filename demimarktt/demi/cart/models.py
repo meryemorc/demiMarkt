@@ -87,23 +87,24 @@ class Cart(models.Model):
         return sum(item['subtotal'] for item in self.items)
 
     def add_item(self, product, selected_color, quantity=1):
-        # Sepete yeni ürün ekleme veya mevcut ürünü güncelleme
         if not self.items:
             self.items = []
+
+        price = product.price or 0  # Fiyat kontrolü, eğer None ise 0 atayın
 
         for item in self.items:
             if item['product_id'] == str(product.ID) and item['selected_color'] == selected_color:
                 item['quantity'] += quantity
-                item['subtotal'] = item['quantity'] * (product.price or 0)
+                item['subtotal'] = item['quantity'] * price
                 break
         else:
             self.items.append({
                 'product_id': str(product.ID),
                 'product_name': product.product_name,
                 'selected_color': selected_color,
-                'price': product.price or 0,
+                'price': price,
                 'quantity': quantity,
-                'subtotal': (product.price or 0) * quantity,
+                'subtotal': price * quantity,
             })
         self.save()
 

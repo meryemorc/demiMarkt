@@ -8,7 +8,7 @@ class Product(models.Model):
     image_link = models.URLField()  # Ürün görseli bağlantısı
 
     # Fiyat ve İndirim Bilgileri
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Geçerli fiyat
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, db_column="Price (Dollar)")
     discount_percentage = models.FloatField(null=True, blank=True)  # İndirim yüzdesi
     price_before_discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # İndirim öncesi fiyat
 

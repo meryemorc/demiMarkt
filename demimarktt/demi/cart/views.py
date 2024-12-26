@@ -4,38 +4,35 @@ from django.contrib.auth.hashers import make_password, check_password  # type: i
 from cart.models import User, Cart  # Sepet ve kullanıcı modelleri
 from products.models import Product
 from django.utils.crypto import get_random_string  # type: ignore
+from decimal import Decimal
+from cart.models import Cart
 
+def get_cart_for_user(request):
+    user = request.user if request.user.is_authenticated else None
+    session_id = request.session.session_key
+    if not session_id:
+        request.session.create()
+        session_id = request.session.session_key
+    
+    cart, created = Cart.objects.get_or_create(
+        user=user,
+        session_id=session_id,
+    )
+    return cart
 
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, ID=product_id)
+    product = get_object_or_404(Product, ID=product_id)  # Ürünü veritabanından çek
+    selected_color = request.POST.get('selected_color')
 
-    if request.method == 'POST':
-        selected_color = request.POST.get('selected_color')
+    price = product.price or 0  # Eğer ürünün fiyatı yoksa 0 olarak kabul et
+    if isinstance(price, str):  # Eğer fiyat string olarak geliyorsa Decimal'e çevir
+        price = Decimal(price)
 
-        # Renk kontrolü
-        if selected_color not in product.color_list:
-            messages.error(request, "Seçilen renk bu ürün için mevcut değil.")
-            return redirect('product_detail', product_id=product_id)
+    # Sepete ürünü eklemek için cart modeline eriş
+    cart = get_cart_for_user(request)  # Kullanıcı için bir sepet al veya oluştur
+    cart.add_item(product, selected_color, quantity=1)  # Ürünü sepete ekle
 
-        # Sepeti kontrol et
-        user_id = request.session.get('user_id')
-        session_id = request.session.session_key or get_random_string(32)
-
-        cart, _ = Cart.objects.get_or_create(
-            user_id=user_id,
-            session_id=session_id if not user_id else None
-        )
-
-        # Ürünü sepete ekle
-        cart.add_item(product, selected_color=selected_color)
-
-        # Başarılı mesajı
-        messages.success(request, f"{product.product_name} ({selected_color}) sepete eklendi.")
-
-        # Sepet sayfasına yönlendirme
-        return redirect('view_cart')
-
-    return redirect('product_detail', product_id=product_id)
+    return redirect('cart_view')  # Sepet sayfasına yönlendir
 
 
 # Kullanıcı Girişi

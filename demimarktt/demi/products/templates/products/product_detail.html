@@ -9,14 +9,30 @@
 <body>
     <div class="container mt-5">
         <div class="row">
+            <!-- Ürün Resmi -->
             <div class="col-md-5">
                 <img src="{{ product.image_link }}" alt="{{ product.product_name }}" class="img-fluid">
             </div>
+            <!-- Ürün Detayları -->
             <div class="col-md-7">
                 <h1>{{ product.product_name }}</h1>
-                <p><strong>Fiyat:</strong> {{ product.price|default:"-" }} $</p>
+                
+                <!-- Fiyat Bilgisi -->
+                <p><strong>Fiyat:</strong> 
+                    {% if product.price %}
+                        {{ product.price }} $
+                    {% else %}
+                        <span class="text-danger">Fiyat bilgisi mevcut değil</span>
+                    {% endif %}
+                </p>
+
+                <!-- Marka -->
                 <p><strong>Marka:</strong> {{ product.brand }}</p>
+
+                <!-- Depolama -->
                 <p><strong>Depolama:</strong> {{ active_storage }} GB</p>
+
+                <!-- Renk Seçenekleri -->
                 <div>
                     <p><strong>Renk Seçenekleri:</strong></p>
                     {% for color in available_colors %}
@@ -25,17 +41,26 @@
                         </button>
                     {% endfor %}
                 </div>
+
+                <!-- Sepete Ekle -->
                 <form method="post" action="{% url 'add_to_cart' product.ID %}">
                     {% csrf_token %}
                     <input type="hidden" id="selected_color" name="selected_color" value="">
-                    <button type="submit" class="btn btn-success mt-3">Sepete Ekle</button>
+                    
+                    {% if product.price %}
+                        <button type="submit" class="btn btn-success">Sepete Ekle</button>
+                    {% else %}
+                        <p class="text-danger">Bu ürünün fiyat bilgisi eksik. Sepete eklenemez.</p>
+                    {% endif %}
                 </form>
+
                 <a href="/" class="btn btn-secondary mt-3">Geri Dön</a>
             </div>
         </div>
     </div>
+
+    <!-- Renk Seçimi için Script -->
     <script>
-        // Renk butonlarına tıklandığında seçimi güncelle
         document.querySelectorAll('.btn-color').forEach(button => {
             button.addEventListener('click', () => {
                 document.getElementById('selected_color').value = button.dataset.color;
