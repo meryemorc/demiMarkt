@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.product_name }} - Ürün Detayı</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'products/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -22,7 +20,25 @@
                 <p><strong>Önceki Fiyat:</strong> {{ product.price_before_discount|default:"-" }} $</p>
                 <p><strong>Ortalama Puan:</strong> {{ product.rating_out_of_5|default:"-" }}/5</p>
                 <p><strong>Değerlendirme Sayısı:</strong> {{ product.number_of_ratings|default:"-" }}</p>
-                <a href="/" class="btn btn-secondary">Geri Dön</a>
+                <div>
+                    <p><strong>Renkler:</strong></p>
+                    {% for color in available_colors %}
+                        <button 
+                            class="btn btn-outline-secondary {% if color == selected_color %}active{% endif %}">
+                            {{ color }}
+                        </button>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <p><strong>Depolama Seçenekleri:</strong></p>
+                    {% for storage in storage_options %}
+                        <button 
+                            class="btn btn-outline-secondary {% if storage == active_storage %}active{% endif %}">
+                            {{ storage }} GB
+                        </button>
+                    {% endfor %}
+                </div>
+                <a href="/" class="btn btn-secondary mt-3">Geri Dön</a>
             </div>
         </div>
     </div>

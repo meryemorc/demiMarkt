@@ -15,3 +15,39 @@ p {
     border-radius: 5px;
     padding: 5px;
 }
+
+/* Buton Tasarımları */
+.btn-option {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #666;
+    background-color: #f9f9f9;
+    cursor: not-allowed;
+    transition: all 0.3s ease;
+}
+
+.btn-option.active {
+    background-color: orange;
+    color: white;
+    border-color: orange;
+    cursor: pointer;
+}
+
+.btn-option:hover {
+    background-color: #f0f0f0;
+    color: #444;
+}
+
+/* Genel Yerleşim */
+.container {
+    margin-top: 30px;
+}
+
+.col-md-7 {
+    padding-left: 30px;
+}
+

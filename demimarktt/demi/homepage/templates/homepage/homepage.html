@@ -114,15 +114,10 @@
                                         {{ product.brand }} - {{ product.model_name }}
                                     </h5>
 
-                                    <!-- Ürünü Git ve Sepete Ekle Butonları -->
-                                    <div class="mt-auto d-flex justify-content-between">
+                                    <!-- Ürünü Git Butonu -->
+                                    <div class="mt-auto d-flex justify-content-center">
                                         <a href="{% url 'product_detail' product.ID %}" 
                                            class="btn btn-primary btn-sm">View Product</a>
-                                        <form method="post" action="/cart/add/">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="product_id" value="{{ product.ID }}">
-                                            <button type="submit" class="btn btn-success btn-sm">Sepete Ekle</button>
-                                        </form>
                                     </div>
                                 </div>
                             </div>

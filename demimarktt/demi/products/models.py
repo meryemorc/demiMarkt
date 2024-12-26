@@ -20,8 +20,11 @@ class Product(models.Model):
     brand = models.CharField(max_length=50, null=True, blank=True)  # Marka
     model_name = models.CharField(max_length=100, null=True, blank=True)  # Model adı
 
-    # Yeni Eklenen Alan: Renk Bilgileri
+    # Renk Bilgileri
     available_colors = models.TextField(null=True, blank=True)  # Mevcut renkler (virgülle ayrılmış)
+
+    # Yeni Eklenen Alan: Depolama Bilgileri
+    storage_gb = models.IntegerField(null=True, blank=True)  # Depolama kapasitesi (örneğin 64, 128)
 
     class Meta:
         db_table = "demiMarktBirlesik"  # MongoDB'deki koleksiyon adı
