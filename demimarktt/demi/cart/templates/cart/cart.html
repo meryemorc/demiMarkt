@@ -13,14 +13,22 @@
         {% if cart_items %}
         <div class="row">
             {% for item in cart_items %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="{{ item.product_name }}" class="card-img-top" alt="{{ item.product_name }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ item.product_name }}</h5>
-                        <p class="card-text">Fiyat: {{ item.price|default:0 }} ₺</p>
-                        <p class="card-text text-end">Ara Toplam: {{ item.subtotal|default:0 }} ₺</p>
-                        <a href="{% url 'remove_from_cart' item.product_id %}" class="btn btn-danger btn-sm">Ürünü Kaldır</a>
+            <div class="col-md-6 mb-4">
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="{{ item.image_link }}" class="img-fluid rounded-start" alt="{{ item.product_name }}">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.product_name }}</h5>
+                                <p class="card-text">Renk: {{ item.selected_color }}</p>
+                                <p class="card-text">Fiyat: {{ item.price|default:0 }} ₺</p>
+                                <p class="card-text">Adet: {{ item.quantity }}</p>
+                                <p class="card-text text-end">Ara Toplam: {{ item.subtotal|default:0 }} ₺</p>
+                                <a href="{% url 'remove_from_cart' item.product_id %}" class="btn btn-danger btn-sm">Ürünü Kaldır</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

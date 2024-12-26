@@ -5,6 +5,39 @@ from cart.models import User, Cart  # Sepet ve kullanıcı modelleri
 from products.models import Product
 from django.utils.crypto import get_random_string  # type: ignore
 
+
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, ID=product_id)
+
+    if request.method == 'POST':
+        selected_color = request.POST.get('selected_color')
+
+        # Renk kontrolü
+        if selected_color not in product.color_list:
+            messages.error(request, "Seçilen renk bu ürün için mevcut değil.")
+            return redirect('product_detail', product_id=product_id)
+
+        # Sepeti kontrol et
+        user_id = request.session.get('user_id')
+        session_id = request.session.session_key or get_random_string(32)
+
+        cart, _ = Cart.objects.get_or_create(
+            user_id=user_id,
+            session_id=session_id if not user_id else None
+        )
+
+        # Ürünü sepete ekle
+        cart.add_item(product, selected_color=selected_color)
+
+        # Başarılı mesajı
+        messages.success(request, f"{product.product_name} ({selected_color}) sepete eklendi.")
+
+        # Sepet sayfasına yönlendirme
+        return redirect('view_cart')
+
+    return redirect('product_detail', product_id=product_id)
+
+
 # Kullanıcı Girişi
 def login(request):
     if request.method == 'POST':
@@ -61,7 +94,7 @@ def view_cart(request):
     user_id = request.session.get('user_id')
     session_id = request.session.session_key or get_random_string(32)
 
-    cart, created = Cart.objects.get_or_create(
+    cart, _ = Cart.objects.get_or_create(
         user_id=user_id,
         session_id=session_id if not user_id else None
     )
@@ -72,25 +105,6 @@ def view_cart(request):
     })
 
 
-# Sepete Ürün Ekleme
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, ID=product_id)  # `ID` alanını kullandık.
-    
-    # Fiyatın eksik olup olmadığını kontrol et
-    if product.price is None:
-        messages.error(request, "Bu ürünün fiyat bilgisi eksik. Sepete eklenemez.")
-        return redirect('homepage')
-
-    user_id = request.session.get('user_id')
-    session_id = request.session.session_key or get_random_string(32)
-
-    cart, _ = Cart.objects.get_or_create(
-        user_id=user_id,
-        session_id=session_id if not user_id else None
-    )
-    cart.add_item(product)
-    messages.success(request, f"{product.product_name} sepete eklendi.")
-    return redirect('view_cart')
 
 
 # Sepetten Ürün Çıkarma

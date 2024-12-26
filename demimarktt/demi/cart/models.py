@@ -1,7 +1,7 @@
-from djongo import models  # type: ignore
+from djongo import models  # type: ignore # Djongo ile MongoDB bağlantısı için
 from products.models import Product  # Ürün modelini içe aktar
-from bson import ObjectId  # type: ignore
-
+from bson import ObjectId  # type: ignore # ObjectId kullanımı için
+from django.db.models import DecimalField  # type: ignore # Django'nun DecimalField'ı
 
 # Adres ve ödeme bilgisi için soyut modeller
 class Address(models.Model):
@@ -49,9 +49,10 @@ class User(models.Model):
 class CartItem(models.Model):
     product_id = models.CharField(max_length=255)  # ObjectId yerine string kullanıyoruz
     product_name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    selected_color = models.CharField(max_length=50, null=True, blank=True)  # Seçilen renk
+    price = DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField(default=1)
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    subtotal = DecimalField(max_digits=10, decimal_places=2, editable=False)
 
     class Meta:
         abstract = True
@@ -84,26 +85,27 @@ class Cart(models.Model):
         if not self.items:
             return 0
         return sum(item['subtotal'] for item in self.items)
-    
-def add_item(self, product, quantity=1):
-    if not self.items:
-        self.items = []
 
-    for item in self.items:
-        if item['product_id'] == str(product.ID):  # ObjectId yerine str karşılaştırması
-            item['quantity'] += quantity
-            item['subtotal'] = item['quantity'] * (product.price or 0)  # Varsayılan değer
-            break
-    else:
-        self.items.append({
-            'product_id': str(product.ID),  # ObjectId yerine string ID
-            'product_name': product.product_name,
-            'price': product.price or 0,  # Varsayılan değer
-            'quantity': quantity,
-            'subtotal': (product.price or 0) * quantity,  # Varsayılan değer
-        })
-    self.save()
+    def add_item(self, product, selected_color, quantity=1):
+        # Sepete yeni ürün ekleme veya mevcut ürünü güncelleme
+        if not self.items:
+            self.items = []
 
+        for item in self.items:
+            if item['product_id'] == str(product.ID) and item['selected_color'] == selected_color:
+                item['quantity'] += quantity
+                item['subtotal'] = item['quantity'] * (product.price or 0)
+                break
+        else:
+            self.items.append({
+                'product_id': str(product.ID),
+                'product_name': product.product_name,
+                'selected_color': selected_color,
+                'price': product.price or 0,
+                'quantity': quantity,
+                'subtotal': (product.price or 0) * quantity,
+            })
+        self.save()
 
     def remove_item(self, product_id):
         # Sepetten ürün çıkarma
