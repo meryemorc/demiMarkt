@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect  # type: ignore
 from django.http import HttpResponse  # type: ignore
-from cart.models import User  # type: ignore
 from products.models import Product  # type: ignore
 from django.core.paginator import Paginator  # type: ignore
 from django.db.models import Count  # type: ignore
@@ -74,13 +73,4 @@ def about(request):
 def contact(request):
     return HttpResponse("İletişim")
 
-def profile_view(request):
-    user_id = request.session.get('user_id')
-    if user_id:
-        try:
-            user = User.objects.get(id=user_id)  # Kullanıcı bilgilerini al
-            return render(request, 'profile.html', {'user': user})
-        except User.DoesNotExist:
-            return redirect('login')  # Kullanıcı bulunamazsa login sayfasına yönlendir
-    else:
-        return redirect('login')  # Oturum yoksa login sayfasına yönlendir
+

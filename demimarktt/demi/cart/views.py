@@ -1,165 +1,104 @@
-from django.shortcuts import render, redirect, get_object_or_404  # type: ignore
-from django.contrib import messages  # type: ignore
-from django.contrib.auth.hashers import make_password, check_password  # type: ignore
-from cart.models import User, Cart  # Sepet ve kullanıcı modelleri
-from products.models import Product
-from django.utils.crypto import get_random_string  # type: ignore
-from decimal import Decimal
-from cart.models import Cart
+from django.shortcuts import render, redirect  # type: ignore
+from django.contrib.auth import authenticate, login, logout  # type: ignore
+from django.contrib.auth.decorators import login_required  # type: ignore
+from django.contrib.auth.models import User  # type: ignore
+from django.contrib import messages  # type: ignore # Mesaj modülünü ekliyoruz
+from django.template.loader import render_to_string # type: ignore
+from django.shortcuts import get_object_or_404, redirect # type: ignore
+from django.http import JsonResponse # type: ignore
+from .models import Cart, CartItem
+from django.contrib.auth.decorators import login_required # type: ignore
+from .models import Cart, CartItem, Product
 
-def get_cart_for_user(request):
-    user = request.user if request.user.is_authenticated else None
-    session_id = request.session.session_key
-    if not session_id:
-        request.session.create()
-        session_id = request.session.session_key
-    
-    cart, created = Cart.objects.get_or_create(
-        user=user,
-        session_id=session_id,
-    )
-    return cart
-
+@login_required
 def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, ID=product_id)  # Ürünü veritabanından çek
-    selected_color = request.POST.get('selected_color')
+    product = get_object_or_404(Product, ID=product_id)
+ # Ürünü al
+    cart, created = Cart.objects.get_or_create(user=request.user)  # Kullanıcıya ait sepeti al veya oluştur
 
-    price = product.price or 0  # Eğer ürünün fiyatı yoksa 0 olarak kabul et
-    if isinstance(price, str):  # Eğer fiyat string olarak geliyorsa Decimal'e çevir
-        price = Decimal(price)
+    # Sepette aynı üründen var mı kontrol et
+    cart_item, item_created = CartItem.objects.get_or_create(
+        product=product,
+        defaults={'price': product.price, 'quantity': 1, 'subtotal': product.price}
+    )
 
-    # Sepete ürünü eklemek için cart modeline eriş
-    cart = get_cart_for_user(request)  # Kullanıcı için bir sepet al veya oluştur
-    cart.add_item(product, selected_color, quantity=1)  # Ürünü sepete ekle
+    if not item_created:
+        # Eğer ürün zaten varsa miktarını artır
+        cart_item.quantity += 1
+        cart_item.subtotal = cart_item.quantity * cart_item.price
+        cart_item.save()
 
-    return redirect('cart_view')  # Sepet sayfasına yönlendir
+    cart.items.add(cart_item)  # Sepete ekle
+    return redirect('view_cart')  # Sepet sayfasına yönlendir
 
+
+  # Sepet detay sayfasına yönlendirme (uygun bir rota ekleyin)
+@login_required
+def view_cart(request):
+    cart = Cart.objects.filter(user=request.user).first()
+    return render(request, 'cart/cart.html', {'cart': cart})
 
 # Kullanıcı Girişi
-def login(request):
+def login_view(request):
+    if request.user.is_authenticated:  # Kullanıcı zaten giriş yapmışsa
+        return redirect('homepage')  # Doğrudan homepage'e yönlendir
+    
     if request.method == 'POST':
-        email = request.POST.get('email')
+        username = request.POST.get('username')
         password = request.POST.get('password')
-
-        try:
-            user = User.objects.get(email=email)
-            if check_password(password, user.password):
-                request.session['user_id'] = str(user.id)  # `user_id` oturumda tutulur
-                messages.success(request, 'Giriş başarılı!')
-                return redirect('homepage')
-            else:
-                messages.error(request, 'Hatalı şifre!')
-        except User.DoesNotExist:
-            messages.error(request, 'Bu e-posta adresine sahip kullanıcı bulunamadı.')
-
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            messages.success(request, 'Giriş başarılı! Hoş geldiniz.')  # Başarı mesajı
+            return redirect('homepage')  # Giriş başarılı, homepage'e yönlendir
+        else:
+            messages.error(request, 'Geçersiz kullanıcı adı veya şifre!')
     return render(request, 'login.html')
 
 
 # Kullanıcı Kaydı
-def register(request):
+def register_view(request):
     if request.method == 'POST':
-        full_name = request.POST.get('full_name')
+        username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
+        if not User.objects.filter(email=email).exists():
+            user = User.objects.create_user(username=username, email=email, password=password)
+            login(request, user)  # Kullanıcıyı otomatik giriş yap
+            return redirect('homepage')
+        else:
+            return render(request, 'register.html', {'error': 'Bu email zaten kullanılıyor!'})
+    return render(request, 'register.html')
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Bu e-posta adresi zaten kayıtlı. Giriş yapabilirsiniz.')
-            return render(request, 'register.html', {'show_login_button': True})
+# Kullanıcı Çıkışı
+def logout_view(request):
+    logout(request)
+    return redirect('homepage')
 
-        user = User(
-            full_name=full_name,
-            email=email,
-            password=make_password(password)
-        )
-        user.save()
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html', {'user': request.user})
 
-        messages.success(request, 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.')
-        return redirect('login')
-
-    return render(request, 'register.html', {'show_login_button': False})
-
-
-# Çıkış Yapma
-def logout(request):
-    request.session.flush()
-    messages.success(request, 'Başarıyla çıkış yaptınız.')
-    return redirect('login')
-
-
-# Sepeti Görüntüleme
-def view_cart(request):
-    user_id = request.session.get('user_id')
-    session_id = request.session.session_key or get_random_string(32)
-
-    cart, _ = Cart.objects.get_or_create(
-        user_id=user_id,
-        session_id=session_id if not user_id else None
-    )
-
-    return render(request, 'cart/cart.html', {
-        'cart_items': cart.items or [],
-        'total_price': cart.total_price,
-    })
-
-
-
-
-# Sepetten Ürün Çıkarma
-def remove_from_cart(request, product_id):
-    user_id = request.session.get('user_id')
-    session_id = request.session.session_key
-
-    cart = Cart.objects.filter(
-        user_id=user_id,
-        session_id=session_id if not user_id else None
-    ).first()
-
-    if cart:
-        cart.remove_item(product_id)
-        messages.success(request, "Ürün sepetten kaldırıldı.")
-    else:
-        messages.error(request, "Sepet bulunamadı.")
+@login_required
+def increase_quantity(request, cart_item_id):
+    cart_item = get_object_or_404(CartItem, id=cart_item_id)
+    cart_item.quantity += 1
+    cart_item.save()
     return redirect('view_cart')
 
+@login_required
+def decrease_quantity(request, cart_item_id):
+    cart_item = get_object_or_404(CartItem, id=cart_item_id)
+    if cart_item.quantity > 1:
+        cart_item.quantity -= 1
+        cart_item.save()
+    else:
+        cart_item.delete()
+    return redirect('view_cart')
 
-# Sipariş Tamamlama
-def checkout(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        messages.error(request, "Sipariş tamamlamak için lütfen giriş yapınız.")
-        return redirect('login')
+@login_required
+def remove_from_cart(request, cart_item_id):
+    cart_item = get_object_or_404(CartItem, id=cart_item_id)
+    cart_item.delete()
+    return redirect('view_cart')
 
-    if request.method == 'POST':
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        postal_code = request.POST.get('postal_code')
-        card_number = request.POST.get('card_number')
-        expiry_date = request.POST.get('expiry_date')
-        cvv = request.POST.get('cvv')
-
-        if not all([address, city, postal_code, card_number, expiry_date, cvv]):
-            return render(request, 'cart/checkout.html', {'error': 'Lütfen tüm alanları doldurun!'})
-
-        user = get_object_or_404(User, id=user_id)
-        try:
-            # Adres ve ödeme bilgisi ekle
-            user.addresses.append({
-                "address": address,
-                "city": city,
-                "postal_code": postal_code
-            })
-            user.payment_methods.append({
-                "card_number": card_number,
-                "expiry_date": expiry_date,
-                "cvv": cvv
-            })
-            user.save()
-
-            # Sepeti temizle
-            Cart.objects.filter(user_id=user_id).delete()
-            messages.success(request, 'Sipariş başarıyla tamamlandı!')
-            return redirect('homepage')
-        except Exception as e:
-            return render(request, 'cart/checkout.html', {'error': f"Hata: {str(e)}"})
-
-    return render(request, 'cart/checkout.html')

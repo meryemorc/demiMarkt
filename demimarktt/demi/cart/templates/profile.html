@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim - DemiMarkt</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'homepage/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    
+    <!-- Profil Bilgileri -->
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header text-center bg-dark text-white">
+                <h2>Profil Bilgilerim</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Kullanıcı Adı:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Ad:</strong> {{ user.first_name|default:"Belirtilmemiş" }}</p>
+                <p><strong>Soyad:</strong> {{ user.last_name|default:"Belirtilmemiş" }}</p>
+                <p><strong>Son Giriş:</strong> {{ user.last_login|date:"d M Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-3 mt-4">
+        <p>&copy; 2024 DemiMarkt. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

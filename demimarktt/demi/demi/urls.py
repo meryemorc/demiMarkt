@@ -3,7 +3,6 @@ from django.urls import path, include # type: ignore
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('cart/', include('cart.urls')),
     path('search/', include('search.urls')),
     path('products/', include('products.urls')),
     path('', include('homepage.urls')), 

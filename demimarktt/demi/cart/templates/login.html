@@ -1,49 +1,28 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Yap</title>
+    <title>Giriş Yap - DemiMarkt</title>
     {% load static %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
+    
+    <!-- Giriş Formu -->
     <div class="container mt-5">
-        <h2 class="text-center mb-4">Giriş Yap</h2>
-
-        <!-- Mesajlar -->
-        {% if messages %}
-            <div class="mt-4">
-                {% for message in messages %}
-                    <div class="alert alert-warning">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <form method="post" action="" class="w-50 mx-auto">
+        <h1 class="text-center">Giriş Yap</h1>
+        <form method="post">
             {% csrf_token %}
             <div class="mb-3">
-                <label for="email" class="form-label">E-posta Adresi</label>
-                <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required>
-                <div id="emailHelp" class="form-text">E-posta adresiniz asla başkalarıyla paylaşılmayacaktır.</div>
+                <input type="text" name="username" class="form-control" placeholder="Kullanıcı Adı" required><br>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Şifre</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="rememberMe">
-                <label class="form-check-label" for="rememberMe">Beni Hatırla</label>
+                <input type="password" name="password" class="form-control" placeholder="Şifre" required><br>
             </div>
             <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
         </form>
-
-        <!-- Kayıt Ol Bağlantısı -->
-        <div class="text-center mt-4">
-            <p>Hesabınız yok mu? <a href="{% url 'register' %}" class="text-primary">Kayıt Ol</a></p>
-        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

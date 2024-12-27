@@ -1,15 +1,16 @@
-from django.urls import path  # type: ignore
+from django.urls import path # type: ignore
 from . import views
 
 urlpatterns = [
-    path('register/', views.register, name='register'),  # Kayıt Ol Sayfası
-    path('login/', views.login, name='login'),  # Giriş Yap Sayfası
-    path('logout/', views.logout, name='logout'),  # Çıkış Yap
-    path('', views.view_cart, name='view_cart'),  # Sepeti Görüntüle
-    path('add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
-    path('remove/<str:product_id>/', views.remove_from_cart, name='remove_from_cart'),  # Ürün Çıkar
-    path('checkout/', views.checkout, name='checkout'),  # Ödeme Sayfas
-
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'),
+    path('profile/', views.profile_view, name='profile'),
+    path('view-cart/', views.view_cart, name='view_cart'),
+    path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('remove-from-cart/<int:cart_item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('increase-quantity/<int:cart_item_id>/', views.increase_quantity, name='increase_quantity'),
+    path('decrease-quantity/<int:cart_item_id>/', views.decrease_quantity, name='decrease_quantity'),
 
 
 ]

@@ -1,53 +1,27 @@
-/* Ürün Detay Sayfası Stil Örneği */
-h1 {
-    color: #007bff;
-    font-size: 2rem;
-    margin-bottom: 20px;
+body {
+    background-color: #f8f9fa;
 }
 
-p {
-    font-size: 1.1rem;
-    margin-bottom: 10px;
+.card {
+    border-radius: 15px;
+    overflow: hidden;
 }
 
-.img-fluid {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 5px;
-}
-
-/* Buton Tasarımları */
-.btn-option {
-    display: inline-block;
+.btn-color {
+    border-radius: 30px;
     padding: 10px 20px;
-    margin: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    color: #666;
-    background-color: #f9f9f9;
-    cursor: not-allowed;
-    transition: all 0.3s ease;
 }
 
-.btn-option.active {
-    background-color: orange;
-    color: white;
-    border-color: orange;
-    cursor: pointer;
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
-.btn-option:hover {
-    background-color: #f0f0f0;
-    color: #444;
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
 }
 
-/* Genel Yerleşim */
-.container {
-    margin-top: 30px;
+h1, h3 {
+    text-transform: capitalize;
 }
-
-.col-md-7 {
-    padding-left: 30px;
-}
-
