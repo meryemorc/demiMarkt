@@ -7,8 +7,7 @@ from django.template.loader import render_to_string # type: ignore
 from django.http import JsonResponse # type: ignore
 from .models import Cart, CartItem, Product
 from .strategies import CardPaymentStrategy, EFTPaymentStrategy, CODPaymentStrategy
-
-
+from .observers import PaymentPublisher, StockUpdateObserver, MailNotificationObserver
 
 @login_required
 def add_to_cart(request, product_id):
@@ -107,35 +106,83 @@ def checkout_view(request):
     return render(request, 'cart/checkout.html')
 
 
+from django.contrib import messages  # type: ignore # Mesaj sistemi için
+from .observers import PaymentPublisher, StockUpdateObserver, MailNotificationObserver
+from .strategies import CardPaymentStrategy, EFTPaymentStrategy, CODPaymentStrategy
+
 @login_required
 def process_payment(request):
     if request.method == 'POST':
-        # Kullanıcıdan gelen verileri alın
+        # Kullanıcıdan gelen ödeme bilgilerini al
         full_name = request.POST.get('full_name')
         address = request.POST.get('address')
         payment_method = request.POST.get('payment_method')
-        amount = 100  # Örnek toplam tutar, sepet toplamını burada kullanabilirsiniz
+        amount = 100  # Örnek toplam tutar (bunu sepetten dinamik olarak almalısınız)
+        user_email = request.user.email  # Kullanıcının e-posta adresi
 
-        # Strategy Pattern ile ödeme işlemi
+        # Kullanıcının e-posta adresini kontrol edin
+        if not user_email:
+            messages.error(request, 'E-posta adresiniz eksik! Lütfen profil bilgilerinizi güncelleyin.')
+            return redirect('profile')  # Kullanıcıyı profil sayfasına yönlendirin
+
+        # Ödeme bilgilerini hazırlayın
+        payment_data = {
+            'user_email': user_email,
+            'product': 'Telefon',  # Bu, sepetten dinamik olarak alınmalıdır
+            'quantity': 1,  # Sepet öğesine bağlı olarak alınmalıdır
+            'amount': amount,
+        }
+
+        # Observer Pattern: Publisher ve Observer'ları oluştur
+        publisher = PaymentPublisher()
+        stock_observer = StockUpdateObserver()
+        mail_observer = MailNotificationObserver()
+
+        # Observer'ları Publisher'a bağla
+        publisher.attach(stock_observer)
+        publisher.attach(mail_observer)
+
+        # Ödeme yöntemi kontrolü ve işlem (Strategy Pattern ile)
         if payment_method == 'credit_card':
             card_number = request.POST.get('card_number')
             expiry_date = request.POST.get('expiry_date')
             cvv = request.POST.get('cvv')
+
+            if not card_number or not expiry_date or not cvv:
+                messages.error(request, 'Kredi kartı bilgileri eksik! Lütfen kontrol edin.')
+                return redirect('checkout')
+
             strategy = CardPaymentStrategy()
             strategy.process_payment(amount, card_number=card_number, expiry_date=expiry_date, cvv=cvv)
+
         elif payment_method == 'eft':
             bank_account = request.POST.get('bank_account')
+
+            if not bank_account:
+                messages.error(request, 'EFT bilgileri eksik! Lütfen kontrol edin.')
+                return redirect('checkout')
+
             strategy = EFTPaymentStrategy()
             strategy.process_payment(amount, bank_account=bank_account)
+
         elif payment_method == 'cash_on_delivery':
             strategy = CODPaymentStrategy()
             strategy.process_payment(amount)
+
         else:
+            messages.error(request, 'Geçersiz ödeme yöntemi seçildi.')
             return redirect('checkout')
 
+        # Observer'ları bilgilendir (Ödeme sonrası süreçler)
+        publisher.process_payment(payment_data)
+
         # Ödeme sonrası başarı sayfasına yönlendir
+        messages.success(request, 'Ödemeniz başarıyla alındı!')
         return redirect('order_confirmation')
+
+    # GET isteği gelirse ödeme sayfasına yönlendirin
     return redirect('checkout')
+
 
 @login_required
 def order_confirmation(request):

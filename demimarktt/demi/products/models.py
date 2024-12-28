@@ -1,4 +1,4 @@
-from djongo import models  # type: ignore # Djongo ile MongoDB bağlantısı için
+from djongo import models  # type: ignore # MongoDB için Djongo kullanımı
 
 class Product(models.Model):
     # Temel Ürün Bilgileri
@@ -23,8 +23,11 @@ class Product(models.Model):
     # Renk Bilgileri
     available_colors = models.TextField(null=True, blank=True)  # Mevcut renkler (virgülle ayrılmış)
 
-    # Yeni Eklenen Alan: Depolama Bilgileri
+    # Depolama Bilgileri
     storage_gb = models.IntegerField(null=True, blank=True)  # Depolama kapasitesi (örneğin 64, 128)
+
+    # Yeni Eklenen Alan: Stok Bilgisi
+    stock = models.PositiveIntegerField(default=5)  # Varsayılan stok miktarı
 
     class Meta:
         db_table = "demiMarktBirlesik"  # MongoDB'deki koleksiyon adı
