@@ -1,14 +1,14 @@
-from django.shortcuts import render, redirect  # type: ignore
+from django.shortcuts import render, redirect,get_object_or_404  # type: ignore
 from django.contrib.auth import authenticate, login, logout  # type: ignore
 from django.contrib.auth.decorators import login_required  # type: ignore
 from django.contrib.auth.models import User  # type: ignore
 from django.contrib import messages  # type: ignore # Mesaj modülünü ekliyoruz
 from django.template.loader import render_to_string # type: ignore
-from django.shortcuts import get_object_or_404, redirect # type: ignore
 from django.http import JsonResponse # type: ignore
-from .models import Cart, CartItem
-from django.contrib.auth.decorators import login_required # type: ignore
 from .models import Cart, CartItem, Product
+from .strategies import CardPaymentStrategy, EFTPaymentStrategy, CODPaymentStrategy
+
+
 
 @login_required
 def add_to_cart(request, product_id):
@@ -102,3 +102,41 @@ def remove_from_cart(request, cart_item_id):
     cart_item.delete()
     return redirect('view_cart')
 
+@login_required
+def checkout_view(request):
+    return render(request, 'cart/checkout.html')
+
+
+@login_required
+def process_payment(request):
+    if request.method == 'POST':
+        # Kullanıcıdan gelen verileri alın
+        full_name = request.POST.get('full_name')
+        address = request.POST.get('address')
+        payment_method = request.POST.get('payment_method')
+        amount = 100  # Örnek toplam tutar, sepet toplamını burada kullanabilirsiniz
+
+        # Strategy Pattern ile ödeme işlemi
+        if payment_method == 'credit_card':
+            card_number = request.POST.get('card_number')
+            expiry_date = request.POST.get('expiry_date')
+            cvv = request.POST.get('cvv')
+            strategy = CardPaymentStrategy()
+            strategy.process_payment(amount, card_number=card_number, expiry_date=expiry_date, cvv=cvv)
+        elif payment_method == 'eft':
+            bank_account = request.POST.get('bank_account')
+            strategy = EFTPaymentStrategy()
+            strategy.process_payment(amount, bank_account=bank_account)
+        elif payment_method == 'cash_on_delivery':
+            strategy = CODPaymentStrategy()
+            strategy.process_payment(amount)
+        else:
+            return redirect('checkout')
+
+        # Ödeme sonrası başarı sayfasına yönlendir
+        return redirect('order_confirmation')
+    return redirect('checkout')
+
+@login_required
+def order_confirmation(request):
+    return render(request, 'cart/order_confirmation.html')

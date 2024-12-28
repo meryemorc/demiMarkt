@@ -1,8 +1,10 @@
+// Sayfa yüklendiğinde çalışan işlemler
+// Hem sepet işlemleri hem de ödeme yöntemi alanlarını kontrol eder
 document.addEventListener("DOMContentLoaded", () => {
     // Sepet işlemleri için gerekli elemanları seç
     const totalPriceElement = document.getElementById("total-price");
 
-    // Miktarı artırma
+    // Miktarı artırma işlemi
     document.querySelectorAll(".increase-quantity").forEach(button => {
         button.addEventListener("click", () => {
             const row = button.closest(".cart-item");
@@ -17,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Miktarı azaltma
+    // Miktarı azaltma işlemi
     document.querySelectorAll(".decrease-quantity").forEach(button => {
         button.addEventListener("click", () => {
             const row = button.closest(".cart-item");
@@ -34,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Ürünü silme
+    // Ürünü silme işlemi
     document.querySelectorAll(".delete-item").forEach(button => {
         button.addEventListener("click", () => {
             const row = button.closest(".cart-item");
@@ -63,5 +65,39 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+    }
+
+    // Ödeme yöntemi alanlarının gösterilmesi/gizlenmesi
+    const paymentMethodSelect = document.getElementById("payment_method");
+    const creditCardFields = document.getElementById("credit_card_fields");
+    const eftFields = document.getElementById("eft_fields");
+
+    paymentMethodSelect.addEventListener("change", () => {
+        const selectedMethod = paymentMethodSelect.value;
+
+        // Alanları göster/gizle
+        if (selectedMethod === "credit_card") {
+            creditCardFields.style.display = "block";
+            eftFields.style.display = "none";
+        } else if (selectedMethod === "eft") {
+            creditCardFields.style.display = "none";
+            eftFields.style.display = "block";
+        } else {
+            creditCardFields.style.display = "none";
+            eftFields.style.display = "none";
+        }
+    });
+
+    // Sayfa yüklendiğinde varsayılan seçime göre alanları ayarla
+    const initialPaymentMethod = paymentMethodSelect.value;
+    if (initialPaymentMethod === "credit_card") {
+        creditCardFields.style.display = "block";
+        eftFields.style.display = "none";
+    } else if (initialPaymentMethod === "eft") {
+        creditCardFields.style.display = "none";
+        eftFields.style.display = "block";
+    } else {
+        creditCardFields.style.display = "none";
+        eftFields.style.display = "none";
     }
 });

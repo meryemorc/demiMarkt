@@ -6,10 +6,11 @@ body {
     padding: 0;
 }
 
-/* Kart başlığı */
+/* Başlık stili */
 h2 {
     font-weight: bold;
     color: #333;
+    text-align: center; /* Başlıkları ortala */
 }
 
 /* Tablo stili */
@@ -24,12 +25,22 @@ h2 {
 .table thead th {
     text-transform: uppercase;
     font-size: 0.9rem;
+    background-color: #343a40; /* Koyu arka plan */
+    color: #ffffff; /* Beyaz yazı */
+}
+
+/* Tablo içeriği */
+.table tbody td {
+    padding: 1rem;
+    font-size: 0.95rem;
+    color: #555;
 }
 
 /* Toplam satırının vurgulanması */
 .table tfoot td {
     font-size: 1.1rem;
     font-weight: bold;
+    background-color: #e9ecef; /* Hafif gri arka plan */
 }
 
 /* Rozetler */
@@ -46,6 +57,7 @@ h2 {
     background-color: #fff3cd; /* Hafif sarı arka plan */
     color: #856404; /* Kahverengi yazı */
     border: 1px solid #ffeeba;
+    border-radius: 5px;
 }
 
 /* Düğmeler */
@@ -70,3 +82,27 @@ h2 {
     color: #fff;
 }
 
+/* Kart Stili */
+.card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+    background-color: #ffffff;
+}
+
+/* Form elemanları */
+.card .form-control {
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    padding: 0.75rem;
+}
+
+.card .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Ödeme yöntemi alanları */
+.payment-fields {
+    display: none;
+}
