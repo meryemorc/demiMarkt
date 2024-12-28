@@ -9,6 +9,7 @@ from .models import Cart, CartItem, Product
 from .strategies import CardPaymentStrategy, EFTPaymentStrategy, CODPaymentStrategy
 from .observers import PaymentPublisher, StockUpdateObserver, MailNotificationObserver
 
+
 @login_required
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, ID=product_id)
@@ -106,10 +107,6 @@ def checkout_view(request):
     return render(request, 'cart/checkout.html')
 
 
-from django.contrib import messages  # type: ignore # Mesaj sistemi için
-from .observers import PaymentPublisher, StockUpdateObserver, MailNotificationObserver
-from .strategies import CardPaymentStrategy, EFTPaymentStrategy, CODPaymentStrategy
-
 @login_required
 def process_payment(request):
     if request.method == 'POST':
@@ -117,20 +114,23 @@ def process_payment(request):
         full_name = request.POST.get('full_name')
         address = request.POST.get('address')
         payment_method = request.POST.get('payment_method')
-        amount = 100  # Örnek toplam tutar (bunu sepetten dinamik olarak almalısınız)
-        user_email = request.user.email  # Kullanıcının e-posta adresi
 
-        # Kullanıcının e-posta adresini kontrol edin
-        if not user_email:
-            messages.error(request, 'E-posta adresiniz eksik! Lütfen profil bilgilerinizi güncelleyin.')
-            return redirect('profile')  # Kullanıcıyı profil sayfasına yönlendirin
+        # Sepeti al
+        cart = Cart.objects.filter(user=request.user).first()
+        if not cart or not cart.items.exists():
+            messages.error(request, 'Sepetiniz boş! Lütfen ürün ekleyin.')
+            return redirect('view_cart')
+
+        # Sepetin ilk ürünü örnek olarak alınıyor (tüm ürünler için genişletilebilir)
+        first_item = cart.items.first()
 
         # Ödeme bilgilerini hazırlayın
         payment_data = {
-            'user_email': user_email,
-            'product': 'Telefon',  # Bu, sepetten dinamik olarak alınmalıdır
-            'quantity': 1,  # Sepet öğesine bağlı olarak alınmalıdır
-            'amount': amount,
+            'user_email': request.user.email,
+            'product': first_item.product.product_name,  # Burada 'name' yerine 'product_name' kullanıldı
+            'quantity': first_item.quantity,
+            'amount': first_item.subtotal,  # Toplam tutar
+            'unit_price': first_item.price,  # Birim fiyat
         }
 
         # Observer Pattern: Publisher ve Observer'ları oluştur
@@ -153,7 +153,7 @@ def process_payment(request):
                 return redirect('checkout')
 
             strategy = CardPaymentStrategy()
-            strategy.process_payment(amount, card_number=card_number, expiry_date=expiry_date, cvv=cvv)
+            strategy.process_payment(payment_data['amount'], card_number=card_number, expiry_date=expiry_date, cvv=cvv)
 
         elif payment_method == 'eft':
             bank_account = request.POST.get('bank_account')
@@ -163,11 +163,11 @@ def process_payment(request):
                 return redirect('checkout')
 
             strategy = EFTPaymentStrategy()
-            strategy.process_payment(amount, bank_account=bank_account)
+            strategy.process_payment(payment_data['amount'], bank_account=bank_account)
 
         elif payment_method == 'cash_on_delivery':
             strategy = CODPaymentStrategy()
-            strategy.process_payment(amount)
+            strategy.process_payment(payment_data['amount'])
 
         else:
             messages.error(request, 'Geçersiz ödeme yöntemi seçildi.')
@@ -182,6 +182,7 @@ def process_payment(request):
 
     # GET isteği gelirse ödeme sayfasına yönlendirin
     return redirect('checkout')
+
 
 
 @login_required

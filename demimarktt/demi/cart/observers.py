@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from django.core.mail import send_mail # type: ignore
+from products.models import Product
+
 
 # Observer Base Class
 class Observer(ABC):
@@ -39,11 +41,23 @@ class StockUpdateObserver(Observer):
         Stokları güncelle.
         :param event_data: Ödeme sonrası ürün bilgileri
         """
-        product = event_data.get("product")
-        quantity = event_data.get("quantity")
-        print(f"Stok Güncelleniyor: {product} için {quantity} adet düşüldü.")
-        # Burada veritabanında stok güncelleme işlemini gerçekleştirin.
-        # Örnek: product.stock -= quantity
+        try:
+            product_name = event_data.get("product")  # Ürünün adı
+            quantity = event_data.get("quantity")  # Satılan miktar
+
+            # Veritabanında ürünü bul
+            product = Product.objects.filter(product_name=product_name).first()
+            if product:
+                if product.stock >= quantity:  # Yeterli stok varsa
+                    product.stock -= quantity
+                    product.save()  # Stok değerini güncelle
+                    print(f"Stok Güncellendi: {product_name} için {quantity} adet düşüldü. Yeni stok: {product.stock}")
+                else:
+                    print(f"Stok Yetersiz: {product_name} için {quantity} adet bulunamadı.")
+            else:
+                print(f"Ürün Bulunamadı: {product_name}")
+        except Exception as e:
+            print(f"Stok güncelleme sırasında hata: {e}")
 
 
 

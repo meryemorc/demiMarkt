@@ -1,20 +1,8 @@
 from pathlib import Path
-import os
 from decouple import config  # type: ignore # Hassas bilgileri .env dosyasından almak için
-
-# E-posta Ayarları
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your-email@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your-email-password')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-default-key')
@@ -53,7 +41,7 @@ ROOT_URLCONF = 'demi.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Genel template klasörü
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,11 +56,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demi.wsgi.application'
 
-# Database
+# Database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',  # Djongo motoru
-        'NAME': 'demiMarktDB',  # Veritabanı adı
+        'ENGINE': 'djongo',
+        'NAME': 'demiMarktDB',
         'CLIENT': {
             'host': config('MONGO_URI', default='your-mongodb-uri')
         }
@@ -95,30 +83,36 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='your-email@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='your-email-password')
+
+# Static and media files
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Istanbul'  # Türkiye saat dilimi
-
+TIME_ZONE = 'Europe/Istanbul'
 USE_I18N = True
-
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Güvenliğinizi artırmak için bazı ek öneriler
+# Security enhancements
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 X_FRAME_OPTIONS = 'DENY'
 
-# Logging yapılandırması (opsiyonel, sorunları debug etmek için)
+# Logging configuration (optional, for debugging)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
