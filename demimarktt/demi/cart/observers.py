@@ -33,6 +33,11 @@ class Subject:
         for observer in self._observers:
             observer.update(event_data)
 
+    # notify_observers için alias
+    def notify_observers(self, event_data):
+        self.notify(event_data)
+
+
 
 # Stock Update Observer (Stok Güncelleme)
 class StockUpdateObserver(Observer):

@@ -1,8 +1,9 @@
 from django.db import models  # type: ignore
 from products.models import Product  # Ürün modelini products uygulamasından alıyoruz
 from django.conf import settings  # type: ignore # Django'nun ayarlarındaki kullanıcı modelini alıyoruz
+from .state import Preparing  # type: ignore # Yeni durum sınıfını ekliyoruz
+from .observers import Subject  # Observer mekanizmasını ekliyoruz
 
-# Sepet Öğesi Modeli
 
 class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -32,3 +33,29 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"Cart of {self.user.username}"
+
+
+class Order(models.Model, Subject):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    total_price = models.FloatField()  # DecimalField yerine FloatField kullanıldı
+    current_state = None  # Varsayılan olarak durum yok
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        Subject.__init__(self)  # Subject sınıfını başlat
+        self.current_state = Preparing()  # Yeni siparişler 'Preparing' durumu ile başlar
+
+    def set_state(self, state):
+        """Siparişin durumunu güncelle."""
+        self.current_state = state
+
+    def proceed_state(self):
+        """Bir sonraki duruma geçiş yap."""
+        if self.current_state:
+            self.current_state.proceed(self)
+
+    def cancel_order(self):
+        """Siparişi iptal et."""
+        if self.current_state:
+            self.current_state.cancel(self)

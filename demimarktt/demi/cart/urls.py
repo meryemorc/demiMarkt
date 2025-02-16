@@ -19,5 +19,15 @@ urlpatterns = [
     path('checkout/', views.checkout_view, name='checkout'),  # Ödeme sayfasını görüntüleme
     path('process-payment/', views.process_payment, name='process_payment'),  # Ödeme bilgilerini işleme
     path('order-confirmation/', views.order_confirmation, name='order_confirmation'),#ödeme tamamlandı sayfası
+   
+    # Sipariş onay sayfası için URL
+    path('cart/order/<int:order_id>/confirmation/', views.order_confirmation, name='order_confirmation'),
+
+    # Sipariş durumunu değiştirmek için URL
+    path('cart/order/<int:order_id>/change/', views.change_order_state, name='change_order_state'),
 
 ]
+
+
+
+

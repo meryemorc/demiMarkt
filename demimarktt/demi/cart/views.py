@@ -5,9 +5,11 @@ from django.contrib.auth.models import User  # type: ignore
 from django.contrib import messages  # type: ignore # Mesaj modülünü ekliyoruz
 from django.template.loader import render_to_string # type: ignore
 from django.http import JsonResponse # type: ignore
-from .models import Cart, CartItem, Product
+from .models import Cart, CartItem, Product,Order
 from .strategies import CardPaymentStrategy, EFTPaymentStrategy, CODPaymentStrategy
 from .observers import PaymentPublisher, StockUpdateObserver, MailNotificationObserver
+
+
 
 
 @login_required
@@ -107,6 +109,7 @@ def checkout_view(request):
     return render(request, 'cart/checkout.html')
 
 
+
 @login_required
 def process_payment(request):
     if request.method == 'POST':
@@ -121,60 +124,69 @@ def process_payment(request):
             messages.error(request, 'Sepetiniz boş! Lütfen ürün ekleyin.')
             return redirect('view_cart')
 
-        # Sepetin ilk ürünü örnek olarak alınıyor (tüm ürünler için genişletilebilir)
-        first_item = cart.items.first()
+        # Sipariş oluştur ve verileri kaydet
+        total_price = cart.total_price()
+        order = Order.objects.create(
+            user=request.user,
+            total_price=total_price
+        )
 
-        # Ödeme bilgilerini hazırlayın
-        payment_data = {
-            'user_email': request.user.email,
-            'product': first_item.product.product_name,  # Burada 'name' yerine 'product_name' kullanıldı
-            'quantity': first_item.quantity,
-            'amount': first_item.subtotal,  # Toplam tutar
-            'unit_price': first_item.price,  # Birim fiyat
-        }
+        # Sepetteki her ürünü siparişe ekleme mantığı (gerekirse genişletilebilir)
+        for cart_item in cart.items.all():
+            # Ödeme için kullanılacak veri
+            payment_data = {
+                'user_email': request.user.email,
+                'product': cart_item.product.product_name,
+                'quantity': cart_item.quantity,
+                'amount': cart_item.subtotal,
+                'unit_price': cart_item.price,
+            }
 
-        # Observer Pattern: Publisher ve Observer'ları oluştur
-        publisher = PaymentPublisher()
-        stock_observer = StockUpdateObserver()
-        mail_observer = MailNotificationObserver()
+            # Observer Pattern: Publisher ve Observer'ları oluştur
+            publisher = PaymentPublisher()
+            stock_observer = StockUpdateObserver()
+            mail_observer = MailNotificationObserver()
 
-        # Observer'ları Publisher'a bağla
-        publisher.attach(stock_observer)
-        publisher.attach(mail_observer)
+            # Observer'ları Publisher'a bağla
+            publisher.attach(stock_observer)
+            publisher.attach(mail_observer)
 
-        # Ödeme yöntemi kontrolü ve işlem (Strategy Pattern ile)
-        if payment_method == 'credit_card':
-            card_number = request.POST.get('card_number')
-            expiry_date = request.POST.get('expiry_date')
-            cvv = request.POST.get('cvv')
+            # Ödeme yöntemi kontrolü ve işlem (Strategy Pattern ile)
+            if payment_method == 'credit_card':
+                card_number = request.POST.get('card_number')
+                expiry_date = request.POST.get('expiry_date')
+                cvv = request.POST.get('cvv')
 
-            if not card_number or not expiry_date or not cvv:
-                messages.error(request, 'Kredi kartı bilgileri eksik! Lütfen kontrol edin.')
+                if not card_number or not expiry_date or not cvv:
+                    messages.error(request, 'Kredi kartı bilgileri eksik! Lütfen kontrol edin.')
+                    return redirect('checkout')
+
+                strategy = CardPaymentStrategy()
+                strategy.process_payment(payment_data['amount'], card_number=card_number, expiry_date=expiry_date, cvv=cvv)
+
+            elif payment_method == 'eft':
+                bank_account = request.POST.get('bank_account')
+
+                if not bank_account:
+                    messages.error(request, 'EFT bilgileri eksik! Lütfen kontrol edin.')
+                    return redirect('checkout')
+
+                strategy = EFTPaymentStrategy()
+                strategy.process_payment(payment_data['amount'], bank_account=bank_account)
+
+            elif payment_method == 'cash_on_delivery':
+                strategy = CODPaymentStrategy()
+                strategy.process_payment(payment_data['amount'])
+
+            else:
+                messages.error(request, 'Geçersiz ödeme yöntemi seçildi.')
                 return redirect('checkout')
 
-            strategy = CardPaymentStrategy()
-            strategy.process_payment(payment_data['amount'], card_number=card_number, expiry_date=expiry_date, cvv=cvv)
+            # Observer'ları bilgilendir (Ödeme sonrası süreçler)
+            publisher.process_payment(payment_data)
 
-        elif payment_method == 'eft':
-            bank_account = request.POST.get('bank_account')
-
-            if not bank_account:
-                messages.error(request, 'EFT bilgileri eksik! Lütfen kontrol edin.')
-                return redirect('checkout')
-
-            strategy = EFTPaymentStrategy()
-            strategy.process_payment(payment_data['amount'], bank_account=bank_account)
-
-        elif payment_method == 'cash_on_delivery':
-            strategy = CODPaymentStrategy()
-            strategy.process_payment(payment_data['amount'])
-
-        else:
-            messages.error(request, 'Geçersiz ödeme yöntemi seçildi.')
-            return redirect('checkout')
-
-        # Observer'ları bilgilendir (Ödeme sonrası süreçler)
-        publisher.process_payment(payment_data)
+        # Sepeti temizle
+        cart.items.clear()
 
         # Ödeme sonrası başarı sayfasına yönlendir
         messages.success(request, 'Ödemeniz başarıyla alındı!')
@@ -184,7 +196,38 @@ def process_payment(request):
     return redirect('checkout')
 
 
-
 @login_required
 def order_confirmation(request):
-    return render(request, 'cart/order_confirmation.html')
+    order = Order.objects.filter(user=request.user).last()  # Kullanıcıya ait son siparişi al
+    if not order:
+        messages.error(request, "Gösterilecek bir sipariş bulunamadı.")
+        return redirect('view_cart')
+
+    return render(request, 'cart/order_confirmation.html', {'order': order})
+
+
+
+def change_order_state(request, order_id):
+    # Siparişi al
+    order = get_object_or_404(Order, id=order_id)
+
+    # Hangi aksiyonun gerçekleştirileceğini al
+    action = request.GET.get('action')
+    
+    if action == 'proceed':
+        # Siparişi bir sonraki duruma geçir
+        order.proceed_state()
+        messages.success(request, "Sipariş durumu başarıyla ilerletildi!")
+    elif action == 'cancel':
+        # Siparişi iptal et
+        order.cancel_order()
+        messages.success(request, "Sipariş başarıyla iptal edildi!")
+
+    # Sipariş durumunu kaydet
+    order.save()
+
+    # Sipariş onay sayfasına yönlendir
+    return redirect('order_confirmation', order_id=order.id)
+
+
+
