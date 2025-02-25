@@ -1,2 +1,1 @@
 # demiMarkt
-vtys proje
